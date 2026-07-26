@@ -107,8 +107,6 @@ uvicorn main:app --reload --port 8001
 
 ### User Workflow
 
-![Lumify Platform Workflow Diagram](./workflow.png)
-
 ```mermaid
 flowchart TD
     1["1. Dashboard"] --> 2["2. Login / Sign Up"]
