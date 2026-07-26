@@ -1,0 +1,73 @@
+RESOURCE_RECOMMENDER_PROMPT = """You are an expert learning resource recommender. Based on the candidate's skill gaps and preferences, recommend high-quality learning resources.
+
+Skill Gaps to Address: {skill_gaps}
+Current Skill Levels: {current_levels}
+Preferred Formats: {preferred_formats}
+Time Constraint: {time_constraint} minutes
+Difficulty Preference: {difficulty_preference}
+
+Live Web Search Context (YouTube Videos for these skills):
+{search_context}
+
+Recommend resources that are:
+1. Relevant to the skill gaps (or target role if no specific gaps exist)
+2. CRITICAL: You MUST use the exact video links from the Live Web Search Context above as your primary recommendations. Do not leave the URL empty if a relevant video was provided. Do not invent URLs.
+3. Appropriate for the difficulty level
+4. Realistic within time constraints
+5. High quality and well-reviewed
+
+Return the information in the following JSON format:
+{{
+    "resources": [
+        {{
+            "title": "resource title",
+            "description": "brief description",
+            "url": "CRITICAL: MUST be the exact http/https URL from the Live Web Search Context. Never leave empty if context provided it.",
+            "type": "video/article/course/documentation/practice",
+            "skill": "associated skill",
+            "difficulty": "beginner/intermediate/advanced",
+            "provider": "provider name (e.g., Udemy, Coursera, YouTube)",
+            "duration_minutes": number or null,
+            "is_free": boolean,
+            "relevance_score": number (0-1),
+            "reason": "why this resource is recommended"
+        }}
+    ],
+    "total_count": number,
+    "estimated_total_time": "total learning time",
+    "priority_order": ["ordered list of skill priorities for learning"]
+}}
+
+Provide only valid JSON as your response, no additional text."""
+
+
+SKILL_ASSESSMENT_PROMPT = """You are an expert skill assessor. Based on the interview performance, assess the candidate's skill levels.
+
+Interview Performance:
+{performance_data}
+
+Skill Gaps Identified: {skill_gaps}
+Question Types Asked: {question_types}
+
+Assess each skill mentioned in terms of:
+1. Current proficiency level (1-10)
+2. Improvement potential
+3. Priority for learning
+
+Return the information in the following JSON format:
+{{
+    "skill_assessments": {{
+        "skill_name": {{
+            "current_level": number (1-10),
+            "target_level": number (1-10),
+            "improvement_needed": "description of what needs improvement",
+            "learning_priority": "high/medium/low",
+            "confidence_score": number (0-1, how confident we are in this assessment)
+        }}
+    }},
+    "overall_skill_readiness": number (0-10),
+    "readiness_for_role": "not_ready/partial_ready/ready/well_ready",
+    "top_3_improvement_areas": ["top 3 skills to focus on"]
+}}
+
+Provide only valid JSON as your response, no additional text."""

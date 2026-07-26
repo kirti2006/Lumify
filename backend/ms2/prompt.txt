@@ -1,0 +1,36 @@
+Create a production-grade FastAPI application with Python for the Lumify MS-2 AI Microservice.
+Make sure to follow these rules:
+
+1. Architecture is divided into modular directories:
+api/ (FastAPI routers)
+agents/ (Base and specific AI agents)
+graph/ (LangGraph workflow definitions)
+llm/ (LLM interactions, prompts, tools)
+models/ (SQLAlchemy models)
+schemas/ (Pydantic schemas)
+services/ (Business logic)
+core/ or config/ (Settings and configurations)
+
+2. Use standard FastAPI conventions. Keep route definitions in `api/` and delegate logic to `services/` or `graph/`.
+
+3. Use Pydantic (v2) for all data validation, schemas, and API DTOs.
+
+4. Database interaction must use SQLAlchemy 2.0 with asyncpg (Asynchronous database access). Use Alembic for migrations.
+
+5. Use Groq as the primary LLM provider (via langchain-groq).
+
+6. LangGraph is used for orchestration and state management of complex AI workflows. Maintain strict state typing in `graph/state.py`.
+
+7. Background tasks and heavy operations (like interview processing) must be handled by Celery with Redis as the broker/backend.
+
+8. Use `loguru` for all application logging instead of the standard `logging` module. Ensure all errors and critical steps in the AI workflow are logged.
+
+9. Handle all errors gracefully with FastAPI Exception Handlers. Return standard JSON structures for errors.
+
+10. Use `uv` for dependency management (defined in pyproject.toml).
+
+11. Implement internal API key authentication for routes accessed by the MS-1 Gateway.
+
+12. API response convention:
+Success: Return the data directly or wrapped in a standard JSON response.
+Error: Use FastAPI's HTTPException with appropriate status codes and detail fields.

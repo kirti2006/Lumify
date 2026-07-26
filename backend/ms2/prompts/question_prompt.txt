@@ -1,0 +1,161 @@
+RESUME_ANALYZER_PROMPT = """You are an expert resume analyst. Your task is to extract structured information from a resume summary.
+
+Analyze the following resume summary and extract:
+1. Skills (technical and soft skills)
+2. Years of experience
+3. Education level and field
+4. Key projects and achievements
+5. Overall experience summary
+
+Return the information in the following JSON format:
+{{
+    "skills": ["list of skills"],
+    "experience_years": number,
+    "education_level": "string (e.g., Bachelor's, Master's, PhD)",
+    "education_field": "string or null",
+    "projects": ["list of key projects"],
+    "experience_summary": "brief summary of experience",
+    "certifications": ["list of certifications if mentioned"],
+    "industries": ["list of industries worked in"]
+}}
+
+Resume Summary:
+{resume_summary}
+
+Provide only valid JSON as your response, no additional text."""
+
+
+JD_ANALYZER_PROMPT = """You are an expert job description analyzer. Your task is to extract key information from a job description.
+
+Analyze the following job description and extract:
+1. Required skills (must-have)
+2. Preferred skills (nice-to-have)
+3. Role title
+4. Company culture hints
+5. Experience requirements
+6. Education requirements
+7. Difficulty level (easy, medium, hard) based on requirements
+
+Return the information in the following JSON format:
+{{
+    "role_title": "string",
+    "company_name": "string or null",
+    "required_skills": ["list of must-have skills"],
+    "preferred_skills": ["list of nice-to-have skills"],
+    "experience_years_required": "number or range",
+    "education_required": "string or null",
+    "difficulty": "easy/medium/hard",
+    "culture_hints": ["list of culture indicators"],
+    "responsibilities": ["list of key responsibilities"],
+    "role_type": "full-time/part-time/contract"
+}}
+
+Job Description:
+{jd_summary}
+
+Provide only valid JSON as your response, no additional text."""
+
+
+GAP_ANALYZER_PROMPT = """You are an expert skills gap analyst. Your task is to identify gaps between a candidate's skills and job requirements.
+
+Compare the following resume skills and job description requirements to identify:
+1. Missing skills (required but not in resume)
+2. Weak skills (mentioned but not strong)
+3. Strong matching skills
+4. Overall gap analysis
+
+Resume Skills: {resume_skills}
+Job Description Required Skills: {jd_required_skills}
+
+Return the information in the following JSON format:
+{{
+    "missing_skills": ["skills required but not present"],
+    "weak_skills": ["skills present but need improvement"],
+    "strong_skills": ["skills well matched"],
+    "gap_percentage": number (0-100),
+    "gap_analysis": "brief text analysis of the gap",
+    "skill_match_recommendations": ["recommendations for improvement"]
+}}
+
+Provide only valid JSON as your response, no additional text."""
+
+
+DIFFICULTY_SELECTOR_PROMPT = """You are an expert interview difficulty selector. Based on the candidate's profile and job requirements, determine the appropriate difficulty level.
+
+Consider:
+1. Years of experience
+2. Skills match percentage
+3. Education level
+4. Type of role (entry, mid, senior, lead)
+
+Candidate Profile:
+{candidate_profile}
+
+Job Requirements:
+{job_requirements}
+
+Return the information in the following JSON format:
+{{
+    "difficulty": "easy/medium/hard",
+    "reasoning": "brief explanation of why this difficulty was chosen",
+    "question_count_recommendation": number,
+    "time_per_question_minutes": number
+}}
+
+Provide only valid JSON as your response, no additional text."""
+
+
+QUESTION_GENERATOR_PROMPT = """You are an expert interview question generator. Generate high-quality interview questions based on the context provided.
+
+Generate questions that are:
+1. Relevant to the role and skills being tested
+2. Appropriate for the difficulty level
+3. Varied in type (behavioral, technical, situational)
+4. Specific and actionable
+
+Context:
+- Role: {role_title}
+- Difficulty: {difficulty}
+- Skills to test: {skills_to_test}
+- Question type: {question_type}
+- Previous questions to avoid: {previous_questions}
+
+For behavioral questions, use the STAR format concepts.
+For technical questions, focus on practical scenarios.
+For coding questions, provide real-world problems.
+For situational questions, create relevant workplace scenarios.
+
+Return the information in the following JSON format:
+{{
+    "question": "the generated question",
+    "question_type": "behavioral/technical/coding/situational",
+    "difficulty": "easy/medium/hard",
+    "expected_skills": ["skills being tested"],
+    "sample_answer_tips": ["tips for answering well"],
+    "scoring_criteria": ["what makes a good answer"]
+}}
+
+Provide only valid JSON as your response, no additional text."""
+
+
+CROSS_QUESTION_GENERATOR_PROMPT = """You are an expert interview question generator specializing in follow-up questions. Based on the previous answer, generate a probing follow-up question.
+
+Previous Question: {previous_question}
+Previous Answer: {previous_answer}
+Question Type: {question_type}
+
+Generate a follow-up question that:
+1. Digs deeper into the topic
+2. Tests depth of knowledge
+3. Probes for more specific details
+4. Challenges assumptions if needed
+
+Return the information in the following JSON format:
+{{
+    "follow_up_question": "the follow-up question",
+    "reasoning": "why this follow-up is relevant",
+    "probing_skills": ["what this question probes"],
+    "difficulty": "easy/medium/hard"
+}}
+
+Provide only valid JSON as your response, no additional text."""

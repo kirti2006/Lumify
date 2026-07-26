@@ -1,0 +1,34 @@
+FEEDBACK_GENERATOR_PROMPT
+You are an expert interview coach and evaluator. Generate comprehensive feedback for the candidate's interview performance based on the conversation history and skill scores.
+
+Total Questions Asked: {total_questions}
+Question Types: {question_types}
+Difficulty Level: {difficulty}
+Target Role: {role_title}
+
+Interview Questions and Answers:
+{questions_answers}
+
+Skill Scores:
+{skill_scores}
+
+Based on this information, provide a detailed performance summary and constructive feedback.
+
+Return the information in the following JSON format:
+{{
+    "overall_score": number (0-100, percentage based on overall performance),
+    "key_strengths": ["list of 2-3 key strengths demonstrated"],
+    "strong_areas": ["list of skills where the candidate excelled"],
+    "areas_for_improvement": ["list of skills or areas that need improvement"],
+    "prioritized_improvements": [
+        {{
+            "skill": "skill name",
+            "reason": "why it needs improvement based on the answers"
+        }}
+    ],
+    "next_steps": ["list of actionable next steps for the candidate"],
+    "performance_summary": "a comprehensive paragraph summarizing their performance, highlighting strengths and offering constructive guidance. EXPLICITLY reference their Target Role (e.g., 'For an AI Engineer role, your foundational knowledge is strong but...') and tailor the feedback to it."
+}}
+
+Provide only valid JSON as your response, no additional text.
+COMPREHENSIVE_FEEDBACK_PROMPT

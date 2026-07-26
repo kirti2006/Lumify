@@ -1,0 +1,59 @@
+# Lumify Application Full Prompt Reference
+
+This document outlines the rules, architecture, and standards for the entire Lumify application (Frontend + Backend Microservices).
+
+---
+
+## Part 1: MS-1 API Gateway & User Service (Express + TypeScript)
+Create a production-grade Express application with TypeScript.
+Make sure to follow these rules:
+
+1. Architecture is modular: src/controllers, src/services, src/routes, src/middlewares, src/database, src/utils, src/config.
+2. Inside these folders, follow naming conventions:
+- Routes: `<name>.routes.ts`
+- Controllers: `<name>.controller.ts`
+- Services: `<name>.service.ts`
+3. Use functional programming for route handlers and services. Use classes for specific use-cases like custom error handling.
+4. Use winston logger for logging. Never use console.log directly.
+5. API response convention:
+   - Success: { success: true, message: "...", data: {...} }
+   - Error: { success: false, message: "...", error: "..." }
+6. Create custom error classes and throw them at required places. Handle centrally via an error-handling middleware.
+7. Use zod for input validation and infer TypeScript types from zod schemas.
+8. Use Drizzle ORM with Postgres (Neon DB) for the database.
+9. Use Redis for caching and rate limiting (Upstash Redis).
+10. JWT based authentication (Access + Refresh tokens) with bcrypt for password hashing.
+11. Middlewares: cors, helmet, express.json, and morgan for HTTP request logging.
+
+---
+
+## Part 2: MS-2 AI Microservice (FastAPI + Python)
+Create a production-grade FastAPI application with Python for the Lumify AI Microservice.
+Make sure to follow these rules:
+
+1. Architecture is divided into modular directories: api/, agents/, graph/, llm/, models/, schemas/, services/, config/.
+2. Use standard FastAPI conventions. Keep route definitions in `api/` and delegate logic to `services/` or `graph/`.
+3. Use Pydantic (v2) for all data validation, schemas, and API DTOs.
+4. Database interaction must use SQLAlchemy 2.0 with asyncpg. Use Alembic for migrations.
+5. Use Groq as the primary LLM provider (via langchain-groq).
+6. LangGraph is used for orchestration and state management of complex AI workflows.
+7. Background tasks and heavy operations handled by Celery with Redis as the broker/backend.
+8. Use `loguru` for all application logging.
+9. Use `uv` for dependency management (defined in pyproject.toml).
+10. Implement internal API key authentication for routes accessed by the MS-1 Gateway.
+
+---
+
+## Part 3: Frontend (React + TypeScript + Vite)
+Create a modern frontend application with React, TypeScript, and Vite.
+Make sure to follow these rules:
+
+1. We will keep separate folders for architectural layers inside `src/`: components/, pages/, services/, context/, hooks/, utils/, types/.
+2. Use Functional Components and Hooks exclusively.
+3. Use Vite as the build tool.
+4. Styling: Use Tailwind CSS and Shadcn UI components.
+5. Routing: Use React Router for client-side routing.
+6. Data Fetching: Use TanStack Query (React Query) for API calls and caching. Use Axios as the HTTP client.
+7. Form Handling: Use React Hook Form with Zod for schema validation.
+8. Error Handling: Centralize API error handling in Axios interceptors (catch 401s for refresh token logic). Use Sonner for toast notifications.
+9. Connect exclusively to the MS-1 Gateway API (`VITE_API_BASE_URL`).

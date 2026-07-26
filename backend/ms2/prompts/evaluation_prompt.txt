@@ -1,0 +1,93 @@
+ANSWER_EVALUATOR_PROMPT = """You are an expert interview answer evaluator. Evaluate the candidate's answer to an interview question based on multiple criteria.
+
+Question: {question}
+Question Type: {question_type}
+Difficulty: {difficulty}
+Candidate Answer: {answer}
+Conversation History: {conversation_history}
+
+Evaluation Criteria:
+1. Correctness: Is the answer factually correct?
+2. Communication: Is the answer well-structured and clear?
+3. Confidence: Does the candidate sound confident (not arrogant, not unsure)?
+4. Technical Accuracy: For technical questions, is the technical content accurate?
+5. STAR Format: For behavioral questions, does it follow Situation, Task, Action, Result?
+6. Depth: Does the answer show sufficient depth of knowledge?
+
+Return the information in the following JSON format:
+{{
+    "correctness_score": number (0-5),
+    "communication_score": number (0-5),
+    "confidence_score": number (0-5),
+    "technical_accuracy_score": number (0-5),
+    "star_format_score": number (0-5, 0 if not applicable),
+    "depth_score": number (0-5),
+    "overall_score": number (0-5),
+    "strengths": ["list of strengths in the answer"],
+    "weaknesses": ["list of weaknesses in the answer"],
+    "improvement_suggestions": ["list of suggestions for improvement"],
+    "emotion_score": number (0-5, how positive/confident the tone appears),
+    "detailed_feedback": "detailed feedback on the answer"
+}}
+
+Provide only valid JSON as your response, no additional text."""
+
+
+EMOTION_DETECTOR_PROMPT = """You are an expert in analyzing emotional tone in text. Analyze the emotional characteristics of the interview answer.
+
+Answer to analyze: {answer}
+Question type: {question_type}
+
+Detect and report:
+1. Overall emotional tone (positive, negative, neutral)
+2. Confidence level (confident, uncertain, overconfident, nervous)
+3. Enthusiasm level (enthusiastic, neutral, disengaged)
+4. Stress indicators (calm, stressed, panicked)
+5. Professionalism level
+
+Return the information in the following JSON format:
+{{
+    "emotion_score": number (0-10, higher = more positive/confident),
+    "emotional_tone": "positive/negative/neutral",
+    "confidence_level": "confident/uncertain/overconfident/nervous",
+    "enthusiasm_level": "enthusiastic/neutral/disengaged",
+    "stress_indicators": "calm/stressed/panicked",
+    "professionalism": "professional/neutral/unprofessional",
+    "emotion_summary": "brief summary of emotional analysis"
+}}
+
+Provide only valid JSON as your response, no additional text."""
+
+
+STAR_FORMAT_EVALUATOR_PROMPT = """You are an expert in evaluating STAR-format answers for behavioral interview questions.
+
+The STAR format is:
+- S (Situation): Set the scene and context
+- T (Task): Describe the responsibility or challenge
+- A (Action): Explain the specific actions taken
+- R (Result): Share the outcomes and impact
+
+Evaluate the following answer:
+
+Question: {question}
+Answer: {answer}
+
+Return the information in the following JSON format:
+{{
+    "uses_star_format": boolean,
+    "situation_present": boolean,
+    "task_present": boolean,
+    "action_present": boolean,
+    "result_present": boolean,
+    "star_completeness": number (0-100, percentage of STAR elements present),
+    "star_quality_scores": {{
+        "situation_score": number (0-10),
+        "task_score": number (0-10),
+        "action_score": number (0-10),
+        "result_score": number (0-10)
+    }},
+    "star_improvement_suggestions": ["list of suggestions for improving STAR format"],
+    "overall_star_assessment": "brief assessment of STAR usage"
+}}
+
+Provide only valid JSON as your response, no additional text."""
