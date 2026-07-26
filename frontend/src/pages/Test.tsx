@@ -126,7 +126,8 @@ export function Test() {
     } catch (err: any) {
       setState("failed");
       console.error(err);
-      toast.error(err.response?.data?.error?.message || "Failed to start session. Ensure you have questions ready.");
+      const errMsg = err.response?.data?.message || err.response?.data?.error?.message || "Failed to start session. Ensure you have questions ready.";
+      toast.error(errMsg);
     }
   };
 

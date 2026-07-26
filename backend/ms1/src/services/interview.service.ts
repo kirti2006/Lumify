@@ -247,6 +247,10 @@ export class InterviewService {
       experienceLevel: interview.experienceLevel,
     })
 
+    if (!aiResult.questions || aiResult.questions.length === 0) {
+      throw new AppError(500, 'Failed to generate interview questions. Please try again or check your job description.', 'AI_GENERATION_FAILED')
+    }
+
     const dbQuestions = []
     for (let i = 0; i < aiResult.questions.length; i++) {
       const q = normalizeQuestion(aiResult.questions[i])
