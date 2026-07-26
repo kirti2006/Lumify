@@ -9,7 +9,7 @@ const schema = z.object({
   JWT_REFRESH_SECRET: z.string().min(32),
   CLOUDINARY_URL: z.string().url(),
   REDIS_URL: z.string().optional(),
-  AI_SERVICE_URL: z.string().url().default('http://127.0.0.1:8000'),
+  AI_SERVICE_URL: z.string().url(),
   AI_SERVICE_API_KEY: z.string().min(1),
   CORS_ORIGIN: z.string().min(1),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),

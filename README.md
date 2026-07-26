@@ -1,6 +1,44 @@
-# Lumify Monorepo
+# Lumify — AI-Powered Adaptive Mock Interview Platform
 
-Welcome to the Lumify project! This repository contains the entire Lumify application, organized as a modern monorepo.
+> **Practice with clarity. Interview with confidence.**
+
+Lumify transforms job descriptions into focused, AI-driven interview sessions and delivers precise, actionable feedback — so you walk into every real interview prepared.
+
+**🚀 Live App:** [lumify-pink.vercel.app](https://lumify-pink.vercel.app)
+
+---
+
+## 📸 UI Showcase
+
+### 🏠 Landing Page
+![Landing Page](docs/screenshots/screenshot_landing.png)
+
+---
+
+### 🔐 Login
+![Login Page](docs/screenshots/screenshot_login.png)
+
+---
+
+### 📊 Dashboard (Overview)
+![Dashboard](docs/screenshots/screenshot_dashboard.png)
+
+---
+
+### 🎯 Interview Setup
+![Interview Setup](docs/screenshots/screenshot_interview_setup.png)
+
+---
+
+### 🎙️ Interview Lobby
+![Interview Lobby](docs/screenshots/screenshot_interview_room.png)
+
+---
+
+### 📋 AI Feedback Report
+![AI Feedback Report](docs/screenshots/screenshot_reports.png)
+
+---
 
 ## Project Structure
 
@@ -10,6 +48,11 @@ Welcome to the Lumify project! This repository contains the entire Lumify applic
 - **`prompt.txt`**: Architecture rules and guidelines for the entire project (also available individually in each folder).
 
 ---
+
+## Deployed URLs
+- Frontend: https://lumify-pink.vercel.app
+- MS-1 API Gateway: https://lumify-ms1.onrender.com
+- MS-2 AI Service: https://lumify-ms2.onrender.com
 
 ## 1. Environment Setup (Getting your keys)
 
