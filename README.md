@@ -10,11 +10,6 @@ Lumify transforms job descriptions into focused, AI-driven interview sessions an
 
 ## 📸 UI Showcase
 
-### 🏠 Landing Page
-![Landing Page](docs/screenshots/screenshot_landing.png)
-
----
-
 ### 🔐 Login
 ![Login Page](docs/screenshots/screenshot_login.png)
 
@@ -32,11 +27,6 @@ Lumify transforms job descriptions into focused, AI-driven interview sessions an
 
 ### 🎙️ Interview Lobby
 ![Interview Lobby](docs/screenshots/screenshot_interview_room.png)
-
----
-
-### 📋 AI Feedback Report
-![AI Feedback Report](docs/screenshots/screenshot_reports.png)
 
 ---
 
