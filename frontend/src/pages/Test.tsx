@@ -23,6 +23,7 @@ export function Test() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   const [state, setState] = useState<TestState>("lobby");
+  const [failError, setFailError] = useState<string>("");
 
   const [questions, setQuestions] = useState<any[]>([]);
   const [currentQ, setCurrentQ] = useState(0);
@@ -126,7 +127,8 @@ export function Test() {
     } catch (err: any) {
       setState("failed");
       console.error(err);
-      const errMsg = err.response?.data?.message || err.response?.data?.error?.message || "Failed to start session. Ensure you have questions ready.";
+      const errMsg = err.response?.data?.message || err.response?.data?.error?.message || "Failed to start session. Please try again.";
+      setFailError(errMsg);
       toast.error(errMsg);
     }
   };
@@ -288,18 +290,34 @@ export function Test() {
   }
 
   if (state === "failed") {
+    const isColdStart = failError.toLowerCase().includes("warming up") || failError.toLowerCase().includes("starting up") || failError.toLowerCase().includes("cold start");
     return (
       <div className="mesh-gradient flex min-h-screen flex-col items-center justify-center p-6 text-center text-slate-950 dark:text-white">
-        <div className="mx-auto mb-6 grid size-16 place-items-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">
+        <div className={`mx-auto mb-6 grid size-16 place-items-center rounded-2xl ${isColdStart ? "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400" : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"}`}>
           <AlertCircle size={28} />
         </div>
-        <h2 className="font-serif text-3xl font-bold tracking-tight">Failed to Start</h2>
+        <h2 className="font-serif text-3xl font-bold tracking-tight">
+          {isColdStart ? "AI Service Warming Up" : "Failed to Start"}
+        </h2>
         <p className="mx-auto mt-3 max-w-md text-slate-500 dark:text-slate-400">
-          We encountered an issue preparing your interview session. Please try again or return to the dashboard.
+          {failError || "We encountered an issue preparing your interview session. Please try again or return to the dashboard."}
         </p>
-        <Link to="/app" className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 font-semibold text-white transition-all hover:bg-slate-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-slate-200">
-          Return to Dashboard
-        </Link>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={() => { setState("lobby"); setFailError(""); }}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 font-semibold text-white transition-all hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+          <Link to="/app" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 font-semibold text-white transition-all hover:bg-slate-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-slate-200">
+            Return to Dashboard
+          </Link>
+        </div>
+        {isColdStart && (
+          <p className="mt-4 text-sm text-slate-400 dark:text-slate-500">
+            💡 The AI service is on a free plan and may take 30–60 seconds to wake up. Clicking "Try Again" usually works!
+          </p>
+        )}
       </div>
     );
   }

@@ -23,8 +23,8 @@ interface CircuitState {
 
 const circuit: CircuitState = { failures: 0, openUntil: 0 }
 const FAILURE_THRESHOLD = 5
-const OPEN_MS = 30_000
-const MAX_RETRIES = 1
+const OPEN_MS = 60_000   // 60s before retrying after circuit opens
+const MAX_RETRIES = 3    // 3 attempts total to handle cold starts
 
 export class AiClient {
   private readonly http: AxiosInstance
@@ -32,12 +32,24 @@ export class AiClient {
   constructor() {
     this.http = axios.create({
       baseURL: env.AI_SERVICE_URL,
-      timeout: 120_000,
+      timeout: 180_000,  // 3 minutes — covers Render cold-start + LLM generation time
       headers: {
         'Content-Type': 'application/json',
         'X-Internal-API-Key': env.AI_SERVICE_API_KEY,
       },
     })
+  }
+
+  /**
+   * Sends a lightweight GET ping to wake up the AI service (Render free tier cold start).
+   * Ignores any errors — this is fire-and-forget to give the service time to boot.
+   */
+  private async warmUp(): Promise<void> {
+    try {
+      await this.http.get('/', { timeout: 10_000 })
+    } catch {
+      // Ignore — the service may still be booting, the real request will retry
+    }
   }
 
   async analyzeResume(payload: { resumeText: string; userId: string }) {
@@ -72,7 +84,6 @@ export class AiClient {
     previousQuestions?: string[]
     conversationHistory?: any[]
   }) {
-    // Wrap text inputs into the dict structures MS2 expects
     const apiPayload = {
       session_id: payload.sessionId,
       user_id: payload.userId,
@@ -84,7 +95,7 @@ export class AiClient {
       previous_questions: payload.previousQuestions || [],
       conversation_history: payload.conversationHistory || []
     }
-    
+
     return this.post<{ session_id: string; question: AiQuestionPayload }>(
       '/api/v1/ai/generate-question',
       apiPayload,
@@ -124,7 +135,7 @@ export class AiClient {
       previous_questions: [],
       conversation_history: []
     }
-    
+
     return this.post<{ session_id: string; questions: AiQuestionPayload[] }>(
       '/api/v1/ai/generate-questions',
       apiPayload,
@@ -153,7 +164,7 @@ export class AiClient {
       answer: payload.transcript,
       conversation_history: payload.conversationHistory || []
     }
-    
+
     const response = await this.post<{ session_id: string; evaluation: AiEvaluationPayload; token_usage: any }>(
       '/api/v1/ai/evaluate-answer',
       apiPayload,
@@ -189,7 +200,7 @@ export class AiClient {
       payload.userId,
       payload.sessionId,
     )
-    
+
     return {
       overallScore: response.feedback.overall_score || 0,
       technicalScore: null,
@@ -214,7 +225,7 @@ export class AiClient {
       interview_id: payload.interviewId,
       skill_gaps: payload.skillGaps,
     }
-    
+
     const response = await this.post<{ session_id: string; resources: any[] }>(
       '/api/v1/ai/recommend-resources',
       apiPayload,
@@ -246,11 +257,16 @@ export class AiClient {
     sessionId?: string,
   ): Promise<T> {
     if (Date.now() < circuit.openUntil) {
-      throw new AppError(503, 'AI service temporarily unavailable', 'AI_SERVICE_UNAVAILABLE')
+      throw new AppError(503, 'AI service is warming up, please try again in a moment', 'AI_SERVICE_UNAVAILABLE')
     }
 
     let lastError: unknown
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      // On first attempt, fire a warm-up ping so Render has time to boot
+      if (attempt === 0) {
+        this.warmUp().catch(() => {})
+      }
+
       const started = Date.now()
       try {
         const { data, status } = await this.http.post<AiEnvelope<T> | T>(path, payload)
@@ -276,6 +292,13 @@ export class AiClient {
         lastError = error
         const durationMs = Date.now() - started
         const statusCode = axios.isAxiosError(error) ? error.response?.status : undefined
+        const isNetworkOrTimeout = axios.isAxiosError(error) && (
+          error.code === 'ECONNABORTED' ||
+          error.code === 'ERR_NETWORK' ||
+          error.code === 'ECONNREFUSED' ||
+          error.code === 'ECONNRESET' ||
+          !error.response
+        )
         const message = axios.isAxiosError(error)
           ? error.message
           : error instanceof Error
@@ -294,7 +317,12 @@ export class AiClient {
         })
 
         if (attempt < MAX_RETRIES - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt))
+          // Use longer backoff for cold-start/network errors vs normal errors
+          const backoffMs = isNetworkOrTimeout
+            ? 5000 * (attempt + 1)   // 5s, 10s — gives Render time to wake up
+            : 500 * 2 ** attempt      // 500ms, 1000ms for transient errors
+          logger.warn(`ai_client_retry attempt=${attempt + 1} path=${path} backoffMs=${backoffMs} isNetworkOrTimeout=${isNetworkOrTimeout}`)
+          await new Promise((resolve) => setTimeout(resolve, backoffMs))
           continue
         }
       }
@@ -306,7 +334,13 @@ export class AiClient {
       logger.warn('ai_circuit_opened', { openUntil: circuit.openUntil })
     }
 
-    throw new AppError(502, 'AI service request failed', 'AI_SERVICE_ERROR', {
+    // Give a helpful, user-friendly error message
+    const isNetworkErr = axios.isAxiosError(lastError) && (!lastError.response || lastError.code === 'ECONNABORTED' || lastError.code === 'ECONNREFUSED')
+    const userMsg = isNetworkErr
+      ? 'The AI service is starting up (cold start). Please wait 30 seconds and try again.'
+      : 'AI service request failed. Please try again.'
+
+    throw new AppError(502, userMsg, 'AI_SERVICE_ERROR', {
       reason: lastError instanceof Error ? lastError.message : 'unknown',
     })
   }
