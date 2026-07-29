@@ -1,5 +1,9 @@
 import nodemailer from "nodemailer";
+import dns from "node:dns";
 
+// Force Node.js to prefer IPv4 over IPv6.
+// Render's network sometimes drops outbound IPv6 to Google's SMTP, causing ENETUNREACH.
+dns.setDefaultResultOrder("ipv4first");
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
