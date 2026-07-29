@@ -88,31 +88,26 @@ REDIS_URL=redis://default:password@upstash-url:6379
 AI_SERVICE_URL=http://127.0.0.1:8001
 AI_SERVICE_API_KEY=my-internal-secret-key
 
-# Email — Gmail + Nodemailer (see setup below)
-SMTP_EMAIL=yourgmail@gmail.com
-SMTP_PASSWORD=your_16_char_app_password
+# Email — Resend API (see setup below)
+RESEND_API_KEY=re_your_api_key_here
 
 # CORS
 CORS_ORIGIN=*
 LOG_LEVEL=info
 ```
 
-#### 📧 Setting up Gmail for OTP Emails
+#### 📧 Setting up Resend for OTP Emails
 
-Lumify uses **Gmail + Nodemailer** to send OTP verification emails. Follow these steps:
+Lumify uses **Resend** for reliable OTP email delivery. Follow these steps:
 
-1. Go to your [Google Account](https://myaccount.google.com/) → **Security**
-2. Enable **2-Step Verification** (required for App Passwords)
-3. Search for **"App Passwords"** in the security settings
-4. Create a new App Password → Select app: **Mail**, device: **Other (Lumify)**
-5. Copy the generated **16-character password** (with or without spaces)
-6. Set in your `.env`:
+1. Go to [Resend.com](https://resend.com) and create a free account.
+2. Generate an API Key in the dashboard.
+3. Set in your `.env`:
    ```env
-   SMTP_EMAIL=yourgmail@gmail.com
-   SMTP_PASSWORD=xxxx xxxx xxxx xxxx
+   RESEND_API_KEY=re_your_api_key_here
    ```
 
-> **Note:** Use your real Gmail address and the App Password (NOT your Gmail login password).
+> **Note:** On Resend's free tier, you can only send emails to the email address you registered your Resend account with.
 
 ---
 
@@ -194,7 +189,7 @@ uvicorn main:app --reload --port 8001
 Lumify uses email OTP verification for new accounts:
 
 1. **Sign Up** → enter name, email, password → account created
-2. **OTP Email** → a 6-digit code is sent to your Gmail inbox via Nodemailer
+2. **OTP Email** → a 6-digit code is sent to your email inbox via Resend
 3. **Verify** → enter the OTP on the verification screen → email verified → logged in
 4. **Login** → if email is not yet verified, an OTP entry panel appears automatically with a **Resend code** button
 
@@ -207,14 +202,14 @@ Lumify uses email OTP verification for new accounts:
 ### Technical Architecture
 
 - **Frontend** → connects to **MS-1** (Gateway) via Vite proxy in dev, direct URL in production
-- **MS-1** → manages users, JWT auth, OTP emails (Gmail/Nodemailer), and proxies interview routes to **MS-2**
+- **MS-1** → manages users, JWT auth, OTP emails (Resend), and proxies interview routes to **MS-2**
 - **MS-2** → uses **Groq** (Llama 3.3 70B) to generate questions and evaluate answers via **LangGraph**
 
 ### User Workflow
 
 ```mermaid
 flowchart TD
-    1["1. Landing Page"] --> 2["2. Sign Up / Login\n• Email OTP Verification\n• Gmail Nodemailer"]
+    1["1. Landing Page"] --> 2["2. Sign Up / Login\n• Email OTP Verification\n• Resend API"]
     2 --> 3["3. Profile Dashboard"]
     3 --> 4["4. Interview Setup\n• Upload Resume & JD\n• Select Role & Experience"]
 
@@ -243,7 +238,7 @@ flowchart TD
 | Database | PostgreSQL (NeonDB) |
 | Cache / Queue | Redis (Upstash) |
 | AI / LLM | Groq (Llama 3.3 70B Versatile) |
-| Email | Gmail + Nodemailer |
+| Email | Resend |
 | Auth | JWT (Access + Refresh tokens), Email OTP |
 | File Storage | Cloudinary |
 | Deployment | Vercel (frontend), Render (backends) |
