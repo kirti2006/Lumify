@@ -1,6 +1,18 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
+import dns from "node:dns";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Force Node.js to prefer IPv4 over IPv6.
+// Render's network sometimes drops outbound IPv6 to Google's SMTP, causing ENETUNREACH.
+dns.setDefaultResultOrder("ipv4first");
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.SMTP_EMAIL,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
 
 export const sendEmail = async (
   to: string,
@@ -8,17 +20,13 @@ export const sendEmail = async (
   bodyHtml: string,
   bodyText?: string
 ) => {
-  try {
-    const data = await resend.emails.send({
-      // "onboarding@resend.dev" is required for free-tier accounts sending to their registered email
-      from: "Lumify <onboarding@resend.dev>",
-      to: [to],
-      subject: subject,
-      html: bodyHtml,
-      text: bodyText || "",
-    });
-    console.log(`Email sent to ${to} via Resend. ID: ${data.data?.id}`);
-  } catch (error) {
-    console.error("Resend Email Error:", error);
-  }
+  await transporter.sendMail({
+    from: `"Lumify" <${process.env.SMTP_EMAIL}>`,
+    to,
+    subject,
+    html: bodyHtml,
+    text: bodyText,
+  });
+
+  console.log(`Email sent to ${to}`);
 };
