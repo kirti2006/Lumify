@@ -46,3 +46,6 @@ coverage/
 
 # Misc
 .drizzle/
+
+# Prompt files (internal use only)
+prompt.txt

@@ -1,8 +1,26 @@
-import { logger } from "../config/logger.js";
+import nodemailer from "nodemailer";
 
-export const sendEmail = async (to: string, subject: string, bodyHtml: string, bodyText?: string) => {
-  logger.info(`[Email Mock] Would have sent email to ${to}`);
-  logger.info(`[Email Mock] Subject: ${subject}`);
-  logger.info(`[Email Mock] Body: ${bodyText || bodyHtml.replace(/<[^>]*>?/gm, "")}`);
-  return true;
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.SMTP_EMAIL,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
+
+export const sendEmail = async (
+  to: string,
+  subject: string,
+  bodyHtml: string,
+  bodyText?: string
+) => {
+  await transporter.sendMail({
+    from: `"Lumify" <${process.env.SMTP_EMAIL}>`,
+    to,
+    subject,
+    html: bodyHtml,
+    text: bodyText,
+  });
+
+  console.log(`Email sent to ${to}`);
 };
