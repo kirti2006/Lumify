@@ -95,6 +95,9 @@ SMTP_PASSWORD=your_16_char_app_password
 # CORS
 CORS_ORIGIN=*
 LOG_LEVEL=info
+
+# Demo mode: set to true to skip email verification and allow signups/logins without OTP
+SKIP_EMAIL_VERIFICATION=true
 ```
 
 #### 📧 Setting up Gmail for OTP Emails
@@ -191,12 +194,33 @@ uvicorn main:app --reload --port 8001
 
 ## 3. Authentication Flow
 
-Lumify uses email OTP verification for new accounts:
+Lumify supports two signup/login flows depending on the MS-1 environment setting:
 
-1. **Sign Up** → enter name, email, password → account created
-2. **OTP Email** → a 6-digit code is sent to your Gmail inbox via Nodemailer
-3. **Verify** → enter the OTP on the verification screen → email verified → logged in
-4. **Login** → if email is not yet verified, an OTP entry panel appears automatically with a **Resend code** button
+### If `SKIP_EMAIL_VERIFICATION=true`
+
+```text
+Signup
+   ↓
+isVerified = true
+   ↓
+User logs in immediately
+```
+
+This is useful for deployed demos where you want a frictionless sign-up experience.
+
+### If `SKIP_EMAIL_VERIFICATION=false`
+
+```text
+Signup
+   ↓
+OTP email sent
+   ↓
+Verify OTP
+   ↓
+Login
+```
+
+In this mode, a 6-digit OTP is sent to the user's email via Nodemailer. The user must enter the code before being allowed to log in.
 
 > Check your **Spam/Junk** folder if you don't receive the email within a minute.
 

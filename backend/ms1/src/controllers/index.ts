@@ -16,7 +16,11 @@ import { jdUploadSchema } from '../validators/schemas.js'
 
 export const authController = {
   signup: async (req: Request, res: Response) => {
-    created(res, await authService.signup(req.body), 'Account created')
+    const result = await authService.signup(req.body)
+    if ((result as any).refreshToken) {
+      setRefreshCookie(res, (result as any).refreshToken)
+    }
+    created(res, result, 'Account created')
   },
   verifyEmail: async (req: Request, res: Response) => {
     const result = await authService.verifyEmail(req.body.email, req.body.code);

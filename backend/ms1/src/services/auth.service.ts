@@ -15,6 +15,10 @@ import type { UserRole } from '../types/index.js'
 import { AppError } from '../utils/http.js'
 
 export class AuthService {
+  shouldRequireEmailVerification() {
+    return !env.SKIP_EMAIL_VERIFICATION
+  }
+
   private signAccessToken(userId: string, role: string) {
     return jwt.sign({ sub: userId, role }, env.JWT_ACCESS_SECRET, { expiresIn: '15m' })
   }
@@ -51,12 +55,14 @@ export class AuthService {
       throw new AppError(409, 'Email already exists', 'EMAIL_EXISTS')
     }
 
+    const isVerified = !this.shouldRequireEmailVerification()
     const [user] = await userRepository.create({
       fullName: input.fullName,
       email: input.email.toLowerCase(),
       passwordHash: await bcrypt.hash(input.password, 12),
       targetRole: input.targetRole,
       experienceLevel: input.experienceLevel,
+      isVerified,
     })
 
     await auditRepository.create({
@@ -66,7 +72,30 @@ export class AuthService {
       resourceId: user.id,
     })
 
-    // Send the verification email in the background (don't await it to block signup response)
+    if (isVerified) {
+      const refreshToken = await this.persistRefreshToken(user.id, user.role)
+
+      await auditRepository.create({
+        userId: user.id,
+        action: 'USER_LOGIN',
+        resourceType: 'user',
+        resourceId: user.id,
+      })
+
+      return {
+        payload: {
+          user: {
+            id: user.id,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role,
+          },
+          accessToken: this.signAccessToken(user.id, user.role),
+        },
+        refreshToken,
+      }
+    }
+
     this.sendVerificationEmail(user.id, user.email, user.fullName).catch(err => {
       console.error('Failed to send verification email:', err)
     })
@@ -110,6 +139,10 @@ export class AuthService {
     const user = await userRepository.findByEmail(email.toLowerCase())
     if (!user) {
       // Don't leak user existence
+      return { success: true }
+    }
+    if (!this.shouldRequireEmailVerification()) {
+      await userRepository.update(user.id, { isVerified: true })
       return { success: true }
     }
     if (user.isVerified) {
@@ -205,7 +238,7 @@ export class AuthService {
       throw new AppError(401, 'Invalid email or password', 'INVALID_CREDENTIALS')
     }
 
-    if (!user.isVerified) {
+    if (this.shouldRequireEmailVerification() && !user.isVerified) {
       throw new AppError(403, 'Email not verified. Please verify your email first.', 'UNVERIFIED_EMAIL')
     }
 

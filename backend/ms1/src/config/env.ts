@@ -13,6 +13,7 @@ const schema = z.object({
   AI_SERVICE_API_KEY: z.string().min(1),
   CORS_ORIGIN: z.string().min(1),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
+  SKIP_EMAIL_VERIFICATION: z.string().optional().default('false').transform(value => value.toLowerCase() === 'true'),
 })
 
 export const env = schema.parse(process.env)

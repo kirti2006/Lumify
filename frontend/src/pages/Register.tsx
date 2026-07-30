@@ -56,7 +56,14 @@ export function Register() {
     setLoading(true);
     try {
       const { api } = await import('../lib/api');
-      await api.post('/auth/signup', { fullName: name, email, password });
+      const res = await api.post('/auth/signup', { fullName: name, email, password });
+      const token = res.data?.data?.payload?.accessToken;
+      if (token) {
+        setToken(token);
+        toast.success('Account created! Redirecting to Lumify...');
+        nav('/app');
+        return;
+      }
       setStep(2);
       toast.success('Account created! Please check your email for the verification code.');
     } catch (err: any) {
