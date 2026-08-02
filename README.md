@@ -240,7 +240,7 @@ In this mode, a 6-digit OTP is sent to the user's email via Nodemailer. The user
 flowchart TD
     1["1. Landing Page"] --> 2["2. Sign Up / Login\n• Email OTP Verification\n• Gmail Nodemailer"]
     2 --> 3["3. Profile Dashboard"]
-    3 --> 4["4. Interview Setup\n• Upload Resume & JD\n• Select Role & Experience"]
+    3 --> 4["4. Interview Setup\n• Paste JD\n• Select Role & Experience"]
 
     4 --> 5["5. AI Interview Room\n• Dynamic Question Generation\n• Microphone / Text Input\n• Real-time AI Responses"]
 
