@@ -1,4 +1,4 @@
-"""Groq client wrapper for Llama 3.3 70B and other free models."""
+"""Groq client wrapper for Llama 4 Scout and other Groq models."""
 
 import json
 import time
@@ -27,7 +27,7 @@ class LLMError(Exception):
 
 
 class GroqClient:
-    """Wrapper for Groq client — free-tier Llama 3.3 70B Versatile."""
+    """Wrapper for Groq client — Llama 4 Scout 17B (meta-llama/llama-4-scout-17b-16e-instruct)."""
 
     def __init__(
         self,

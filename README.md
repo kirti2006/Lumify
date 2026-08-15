@@ -137,7 +137,7 @@ REDIS_URL=redis://default:password@upstash-url:6379/0
 # Groq — get free key at https://console.groq.com/keys
 LLM_PROVIDER=groq
 GROQ_API_KEY=your-groq-api-key
-GROQ_DEFAULT_MODEL=llama-3.3-70b-versatile
+GROQ_DEFAULT_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
 
 # Must match AI_SERVICE_API_KEY in MS-1
 INTERNAL_API_KEY=my-internal-secret-key
@@ -266,7 +266,7 @@ flowchart TD
 | MS-2 Backend | Python, FastAPI, LangGraph, LangChain |
 | Database | PostgreSQL (NeonDB) |
 | Cache / Queue | Redis (Upstash) |
-| AI / LLM | Groq (Llama 3.3 70B Versatile) |
+| AI / LLM | Groq (Llama 4 Scout 17B) |
 | Email | Gmail + Nodemailer |
 | Auth | JWT (Access + Refresh tokens), Email OTP |
 | File Storage | Cloudinary |
