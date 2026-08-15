@@ -35,9 +35,9 @@ class Settings(BaseSettings):
 
     llm_provider: str = Field(default="groq")
 
-    # Groq settings (free tier — meta-llama/llama-4-scout-17b-16e-instruct)
+    # Groq settings (free tier — openai/gpt-oss-120b)
     groq_api_key: str = Field(default="")
-    groq_default_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    groq_default_model: str = "openai/gpt-oss-120b"
     groq_default_temperature: float = 0.7
     groq_default_timeout: int = 120
     groq_max_retries: int = 3
